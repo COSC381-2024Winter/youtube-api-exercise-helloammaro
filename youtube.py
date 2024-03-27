@@ -22,27 +22,30 @@ def youtube_search(query_term, max_results, page_token=None):
     search_list = []
     for item in search_response['items']:
         search_list.append(item)
-        
+       
     if len(search_list) == 0:
         print("No results")
     elif len(search_list) < int(max_results):
         print("No more results")
-        
+       
     return search_list, next_page_token
 
 if __name__ == "__main__":
-
     query_term = sys.argv[1]
     max_results = sys.argv[2]
 
     print(f"Searching for '{query_term}' with maximum results of {max_results}")
-    
-    video_list, next_page_token = youtube_search(query_term, max_results)
-    
-    if len(video_list) != 0:
-        print(video_list)
 
-    print("Second page ----------------------")
-    video_list, next_page_token = youtube_search(query_term, max_results, page_token=next_page_token)
-    if len(video_list) != 0:
-        print(video_list)
+    page_count = 0
+    next_page_token = None
+
+    while page_count < 5:
+        print("Page", page_count + 1, "--------------------------------")
+        video_list, next_page_token = youtube_search(query_term, max_results, page_token=next_page_token)
+        
+        if len(video_list) != 0:
+            print(video_list)
+            page_count += 1
+        else:
+            print("No more results.")
+            break
