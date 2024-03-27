@@ -6,8 +6,7 @@ YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 DEVELOPER_KEY = config.API_KEY
 
-def youtube_search(query_term, max_results):
-    print(f"Searching for '{query_term}' with maximum results of {max_results}")
+def youtube_search(query_term, max_results, page_token=None):
     youtube = build(YOUTUBE_API_SERVICE_NAME,
                     YOUTUBE_API_VERSION,
                     developerKey=DEVELOPER_KEY)
@@ -15,9 +14,11 @@ def youtube_search(query_term, max_results):
         q=query_term,
         part="id,snippet",
         maxResults=max_results,
-        type="video"
+        type="video",
+        pageToken=page_token
     ).execute()
-    
+
+    next_page_token = search_response['nextPageToken']
     search_list = []
     for item in search_response['items']:
         search_list.append(item)
@@ -27,17 +28,21 @@ def youtube_search(query_term, max_results):
     elif len(search_list) < int(max_results):
         print("No more results")
         
-    return search_list
+    return search_list, next_page_token
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python youtube.py [query_term] [max_results]")
-        sys.exit(1)
-    
+
     query_term = sys.argv[1]
     max_results = sys.argv[2]
+
+    print(f"Searching for '{query_term}' with maximum results of {max_results}")
     
-    video_list = youtube_search(query_term, max_results)
+    video_list, next_page_token = youtube_search(query_term, max_results)
     
+    if len(video_list) != 0:
+        print(video_list)
+
+    print("Second page ----------------------")
+    video_list, next_page_token = youtube_search(query_term, max_results, page_token=next_page_token)
     if len(video_list) != 0:
         print(video_list)
